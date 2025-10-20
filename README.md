@@ -22,7 +22,7 @@ A **ComfyUI custom node** to run **DreamOmni2 GGUF** models directly in ComfyUI.
 git clone https://github.com/rafacost/rafacost-comfy.git
 ```
 
-2. Download the model and loras from my huggingface ![here](https://huggingface.co/rafacost/DreamOmni2-7.6B-GGUF)
+2. Download the model and loras from my huggingface [here](https://huggingface.co/rafacost/DreamOmni2-7.6B-GGUF)
 
 3. Place your DreamOmni2 GGUF model and lora files into:
 ```bash

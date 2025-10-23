@@ -6,13 +6,13 @@ A **ComfyUI custom node** to run **DreamOmni2 GGUF** models directly in ComfyUI.
 <sub>(Or help us to develop it if you really want 😁...)</sub>
 
 ### Generation Lora
-![Example](examples/example.png)
+![Example](https://raw.githubusercontent.com/rafacost/rafacost-comfy/main/examples/example.png)
 
 ### Edit Lora
-![ExampleEdit](examples/example_edit.png)
+![ExampleEdit](https://raw.githubusercontent.com/rafacost/rafacost-comfy/main/examples/example_edit.png)
 
 For the workflow drag and drop this image:
-![ImageEdit](examples/‎image_edit.png)
+![ImageEdit](https://raw.githubusercontent.com/rafacost/rafacost-comfy/main/examples/image_edit.png)
 
 ---
 
@@ -51,7 +51,7 @@ ComfyUI/models/loras
 
 Use the provided examples/image.png to test the node.
 
-![Example](examples/image.png)
+![Example](https://raw.githubusercontent.com/rafacost/rafacost-comfy/main/examples/image.png)
 
 ---
 ### Notes

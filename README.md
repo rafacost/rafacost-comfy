@@ -2,7 +2,17 @@
 
 A **ComfyUI custom node** to run **DreamOmni2 GGUF** models directly in ComfyUI.  
 
+⚠️ **This is a Work In Progress Download at your own risk!** ⚠️<br/>
+<sub>(Or help us to develop it if you really want 😁...)</sub>
+
+### Generation Lora
 ![Example](examples/example.png)
+
+### Edit Lora
+![ExampleEdit](examples/example_edit.png)
+
+For the workflow drag and drop this image:
+![ImageEdit](examples/‎image_edit.png)
 
 ---
 

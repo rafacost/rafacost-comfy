@@ -70,6 +70,7 @@ You can copy it into your ComfyUI `custom_nodes/rafacost-comfy/` folder or anoth
    ├── flux1-kontext-dev-Q5_K.gguf
    ComfyUI/models/loras/
    ├── DreamOmni2-7.6B-Edit-Lora.safetensors
+   ├── DreamOmni2-7.6B-Gen-Lora.safetensors
    ```
 
 ---

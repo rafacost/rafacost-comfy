@@ -108,7 +108,7 @@ Try with this test image or download the workflow from the workflow folder:
 | ---------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | `CLI failed: not found`                  | Wrong path to `llama-mtmd-cli.exe`.                                          | Verify path and escape backslashes (`C:\\path\\to\\llama-mtmd-cli.exe`). |
 | Model loads but crashes                  | Out-of-memory or incompatible quantization.                                  | Try a smaller GGUF quant (e.g. `Q4_K` instead of `Q8_0`).                |
-| `failed to load mmproj/vision`           | Missing mmproj file.                                                         | Download or copy `mmproj.gguf` into the same folder as the model.        |
+| `'NoneType' object is not iterable`      | Missing mmproj file.                                                         | Download or copy `mmproj.gguf` into the same folder as the model.        |
 | No output text                           | The model didn’t produce text tokens.                                        | Increase `max_tokens` (e.g. 512 or 1024).                                |
 | Garbled CLI text                         | Locale issue.                                                                | Run ComfyUI with UTF-8 environment: `set PYTHONUTF8=1`.                  |
 

@@ -96,10 +96,7 @@ The node will execute the CLI, process the images, and return text results to bo
 
 ## 🧪 Example
 
-Try with this test image or download the workflow from the workflow folder:
-
-![Example](https://raw.githubusercontent.com/rafacost/rafacost-comfy/main/examples/image_edit_result.png)
-
+Try workflow folder, or the image_result.png in examples.
 
 ---
 
@@ -112,6 +109,8 @@ Try with this test image or download the workflow from the workflow folder:
 | `'NoneType' object is not iterable`      | Missing mmproj file.                                                         | Download or copy `mmproj.gguf` into the same folder as the model.        |
 | No output text                           | The model didn’t produce text tokens.                                        | Increase `max_tokens` (e.g. 512 or 1024).                                |
 | Garbled CLI text                         | Locale issue.                                                                | Run ComfyUI with UTF-8 environment: `set PYTHONUTF8=1`.                  |
+| Low Image Quality                        | Low Base Model GGUF quant                                                    | Try a higher GGUF quant for BaseModel (eg. use flux_kontext:`Q8_0`)      |
+| Low Prompt Adherence                     | Low DreamOmni2 GGUF quant                                                    | Try a higher GGUF quant for DreamOmni2 (eg. use DreamOmni2-GGUF:`Q8_0`)  |
 
 ---
 

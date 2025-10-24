@@ -47,7 +47,7 @@ The compiled binary will appear at:
 build/bin/Release/llama-mtmd-cli.exe
 ```
 
-You can copy it into your ComfyUI `custom_nodes/rafacost-comfy-dev/` folder or another location of your choice.
+You can copy it into your ComfyUI `custom_nodes/rafacost-comfy/` folder or another location of your choice.
 
 ---
 

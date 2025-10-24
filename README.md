@@ -98,7 +98,8 @@ The node will execute the CLI, process the images, and return text results to bo
 
 Try with this test image or download the workflow from the workflow folder:
 
-![Example](https://raw.githubusercontent.com/rafacost/rafacost-comfy/main/examples/image.png)
+![Example](https://raw.githubusercontent.com/rafacost/rafacost-comfy/main/examples/image_edit_result.png)
+
 
 ---
 

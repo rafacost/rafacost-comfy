@@ -117,7 +117,7 @@ Try with this test image or download the workflow from the workflow folder:
 
 ## 🗒️ Notes
 
-* Requires **ComfyUI ≥ 0.3.62**.
+* Requires **ComfyUI ≥ 0.3.66**.
 * Tested on **Python 3.12** and **Windows 11**.
 * GPU recommended for large GGUFs.
 * Original model licensing applies — this node only provides an interface.

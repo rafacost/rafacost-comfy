@@ -2,7 +2,8 @@
 
 A **ComfyUI custom node** to run **DreamOmni2 GGUF** models directly inside ComfyUI — now with **multimodal (image + text)** support through the **llama-mtmd-cli** tool.
 
-⚠️ **Work In Progress – use at your own risk.** <sub>(Or better: fork and help improve it.)</sub>
+⚠️ **Work In Progress – use at your own risk.** 
+<sub>(Or better: fork and help improve it.)</sub>
 
 ---
 

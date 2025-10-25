@@ -2,7 +2,8 @@
 
 A **ComfyUI custom node** to run **DreamOmni2 GGUF** models directly inside ComfyUI — now with **multimodal (image + text)** support through the **llama-mtmd-cli** tool.
 
-⚠️ **Work In Progress – use at your own risk.** <sub>(Or better: fork and help improve it.)</sub>
+⚠️ **Work In Progress – use at your own risk.** ⚠️ <br/>
+<sub>(Or better: fork and help improve it.)</sub>
 
 ---
 
@@ -70,6 +71,7 @@ You can copy it into your ComfyUI `custom_nodes/rafacost-comfy/` folder or anoth
    ├── flux1-kontext-dev-Q5_K.gguf
    ComfyUI/models/loras/
    ├── DreamOmni2-7.6B-Edit-Lora.safetensors
+   ├── DreamOmni2-7.6B-Gen-Lora.safetensors
    ```
 
 ---
@@ -96,10 +98,7 @@ The node will execute the CLI, process the images, and return text results to bo
 
 ## 🧪 Example
 
-Try with this test image or download the workflow from the workflow folder:
-
-![Example](https://raw.githubusercontent.com/rafacost/rafacost-comfy/main/examples/image_edit_result.png)
-
+Try workflow folder, or the image_result.png in examples.
 
 ---
 
@@ -112,6 +111,8 @@ Try with this test image or download the workflow from the workflow folder:
 | `'NoneType' object is not iterable`      | Missing mmproj file.                                                         | Download or copy `mmproj.gguf` into the same folder as the model.        |
 | No output text                           | The model didn’t produce text tokens.                                        | Increase `max_tokens` (e.g. 512 or 1024).                                |
 | Garbled CLI text                         | Locale issue.                                                                | Run ComfyUI with UTF-8 environment: `set PYTHONUTF8=1`.                  |
+| Low Image Quality                        | Low Base Model GGUF quant                                                    | Try a higher GGUF quant for BaseModel (eg. use flux_kontext:`Q8_0`)      |
+| Low Prompt Adherence                     | Low DreamOmni2 GGUF quant                                                    | Try a higher GGUF quant for DreamOmni2 (eg. use DreamOmni2-GGUF:`Q8_0`)  |
 
 ---
 

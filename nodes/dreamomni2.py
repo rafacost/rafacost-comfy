@@ -1,50 +1,37 @@
-import subprocess
 import os
-import folder_paths
+import subprocess
+import re
 import torch
-from PIL import Image
 import numpy as np
+import folder_paths
 
 
-
-def tensor_to_pil(t):
-    # Remove extra batch or mask dimensions
-    if t.ndim == 4:  # (B, C, H, W)
-        t = t[0]
-    elif t.ndim == 5:  # (1, 1, H, W, C)
-        t = t[0, 0]
-    
-    # Move channels last if needed
-    if t.shape[0] in (1, 3):  # (C, H, W)
-        t = t.permute(1, 2, 0)
-
-    arr = (t.clamp(0, 1).numpy() * 255).astype(np.uint8)
-    return Image.fromarray(arr)
 
 class DreamOmni2VLM():
+    CACHEABLE = True
     @classmethod
     def INPUT_TYPES(cls):
         # discover local unet models
-        unet_dir = os.path.join(folder_paths.models_dir, "unet")
+        extra = folder_paths.get_folder_paths("unet") 
         ggufs = ["none"]
         mmprojs = ["none"]
-        if os.path.isdir(unet_dir):
-            ggufs += [f for f in os.listdir(unet_dir) if f.lower().endswith(".gguf")]
-            mmprojs += [f for f in os.listdir(unet_dir) if f.lower().endswith(".gguf") and "mmproj" in f.lower()]
-            
-
+        for path in extra:
+            if os.path.isdir(path):
+                ggufs += [f for f in os.listdir(path) if f.lower().endswith(".gguf")]
+                mmprojs += [f for f in os.listdir(path) if f.lower().endswith(".gguf") and "mmproj" in f.lower()]
+    
         return {
             "required": {
                 "cli_path": ("STRING", {"default": "C:\\path\\to\\llama-mtmd-cli.exe"}),
                 "model_name": (ggufs, {"default": ggufs[0] if ggufs else ""}),
                 "mmproj_path": (mmprojs, {"default": mmprojs[0] if mmprojs else ""}),
-                "prompt": ("STRING", {"default": "Describe the image(s).", "multiline": True}),
+                "prompt": ("STRING", {"default": "Describe the images with detail.", "multiline": True}),
                 "image1": ("IMAGE",),
                 "image2": ("IMAGE",),
-                "clip": ("CLIP",),  # from Flux DualCLIPLoader
-                "temperature": ("FLOAT", {"default": 0.7}),
-                "max_tokens": ("INT", {"default": 1024}),
-                "as_conditioning": ("BOOLEAN", {"default": False}),
+                "clip": ("CLIP",), 
+                "temperature": ("FLOAT", {"default": 0.6, "min": 0.0, "max": 1.0, "step": 0.1}),
+                "max_tokens": ("INT", {"default": 1024, "min": 256, "max": 16384, "step": 256}),
+                "as_conditioning": ("BOOLEAN", {"default": True}),
             },
         }
 
@@ -53,10 +40,28 @@ class DreamOmni2VLM():
     FUNCTION = "run"
     CATEGORY = "rafacostComfy/VLM"
 
+
+
     def run(self, cli_path, model_name, mmproj_path, prompt,
             image1, image2, clip,temperature, max_tokens, as_conditioning):
         model_path = folder_paths.get_full_path("unet", model_name)
         mmproj_path = folder_paths.get_full_path("unet", mmproj_path)
+        
+        from PIL import Image
+
+        def tensor_to_pil(t):
+            # Remove extra batch or mask dimensions
+            if t.ndim == 4:  # (B, C, H, W)
+                t = t[0]
+            elif t.ndim == 5:  # (1, 1, H, W, C)
+                t = t[0, 0]
+            
+            # Move channels last if needed
+            if t.shape[0] in (1, 3):  # (C, H, W)
+                t = t.permute(1, 2, 0)
+
+            arr = (t.clamp(0, 1).numpy() * 255).astype(np.uint8)
+            return Image.fromarray(arr)
 
         # Save the images to temporary files
         tmp1 = os.path.join(folder_paths.get_temp_directory(), "vlm_img1.png")
@@ -68,10 +73,8 @@ class DreamOmni2VLM():
         img2 = tensor_to_pil(image2)
         img2.save(tmp2)
 
-        print(f"[DreamOmni2-VLM] Using model: {model_path}")
-        print(f"[DreamOmni2-VLM] Using mmproj: {mmproj_path}")
-        print(f"[DreamOmni2-VLM] Image paths: {tmp1}, {tmp2}")
-        print(f"[DreamOmni2-VLM] Prompt: {prompt}")        
+        # Clean prompt of problematic characters
+        prompt = re.sub(r"[\"'`´]", "", prompt)  
 
         cmd = [
             cli_path,
@@ -81,19 +84,22 @@ class DreamOmni2VLM():
             "--n-predict", str(max_tokens),
             "--image", tmp1,
             "--image", tmp2,
-            "--prompt", prompt,
+            "--prompt", "'" + prompt + "'",
         ]
 
-        print(f"[DreamOmni2-VLM] Running: {' '.join(cmd)}")
+        print("=================================================================")
+        print(f"[rafacostComfy: DreamOmni2-VLM] Running LLAMA-MTMD-CLI: {' '.join(cmd)}")
+        
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
             raise RuntimeError(f"CLI failed: {result.stderr.strip()}")
 
         output = result.stdout.strip()
-        print("=====================================================")
-        print(f"[DreamOmni2-VLM] Output:\n{output}")
-        print("=====================================================")
-
+        output = re.findall(r"<gen>(.*?)</gen>", output, flags=re.DOTALL)
+        output = output[0].strip() if output else ""
+        
+        print(f"[rafacostComfy: DreamOmni2-VLM] Output:\n{output}")
+        print("=================================================================")
         if as_conditioning:
             clip_text = output.strip()
             tokens = clip.tokenize(clip_text)
@@ -102,21 +108,10 @@ class DreamOmni2VLM():
             # Ensure both are torch tensors
             embedding = torch.tensor(embedding) if not isinstance(embedding, torch.Tensor) else embedding
             pooled = torch.tensor(pooled) if not isinstance(pooled, torch.Tensor) else pooled
-
             conditioning = [[embedding, {"clip": embedding, "pooled_output": pooled, "text": clip_text}]]
 
-
-
-
-            print(f"[DreamOmni2-VLM] Returning conditioning.")
-            print(f"[DreamOmni2-VLM] {conditioning}.")
-            print(f"[DreamOmni2-VLM] Returning output.")
-            print(f"[DreamOmni2-VLM] {clip_text}.")
             return (conditioning, clip_text)
-
         else:
-            print(f"[DreamOmni2-VLM] Returning output.")
-            print(f"[DreamOmni2-VLM] {output}.")
             return (None, output)
 
 

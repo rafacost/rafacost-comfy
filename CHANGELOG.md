@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.1] - 2025-10-27
+### Minor Changes
+- **Fixed using only two or three images**  
+  DreamOmni2 now can run with 2 to 4 images.
+
 ## [0.4.0] - 2025-10-25
 ### Major Changes
 - **Removed external CLI dependency**  

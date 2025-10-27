@@ -5,6 +5,7 @@ import numpy as np
 import folder_paths
 import hashlib
 import base64
+import json
 from PIL import Image
 from llama_cpp import Llama
 from llama_cpp.llama_chat_format import Qwen25VLChatHandler
@@ -45,17 +46,19 @@ class DreamOmni2VLM:
                 "model_name": (ggufs, {"default": ggufs[0]}),
                 "mmproj_path": (mmprojs, {"default": mmprojs[0]}),
                 "prompt": ("STRING", {"default": "Describe the images with detail.", "multiline": True}),
+                "clip": ("CLIP",),
                 "image1": ("IMAGE",),
                 "image2": ("IMAGE",),
-                "image3": ("IMAGE",),
-                "image4": ("IMAGE",),
-                "clip": ("CLIP",),
                 "seed": ("INT", {"default": 42}),
                 "temperature": ("FLOAT", {"default": 0.5}),
                 "max_tokens": ("INT", {"default": 2048, "min": 512, "max": 4096, "step": 256}),
                 "n_ctx": ("INT", {"default": 2048, "min": 512, "max": 128000, "step": 256}),
                 "as_conditioning": ("BOOLEAN", {"default": True}),
                 "use_cache": ("BOOLEAN", {"default": True}),
+            },
+            "optional": {                
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
             },
             "hidden": {
                 "unique_id": "UNIQUE_ID",
@@ -73,10 +76,13 @@ class DreamOmni2VLM:
         key = f"{model_name}_{mmproj_path}_{prompt}_{img_hash(image1)}_{img_hash(image2)}_{img_hash(image3)}_{img_hash(image4)}_{seed}_{temperature}_{max_tokens}"
         return hashlib.md5(key.encode()).hexdigest()
 
-    def run(self, model_name, mmproj_path, prompt, image1, image2, image3, image4, clip,
-            temperature, max_tokens, as_conditioning, seed, n_ctx,use_cache=True, unique_id=None, extra_pnginfo=None):
+    def run(self, model_name, mmproj_path, prompt, image1, image2, clip,
+            temperature, max_tokens, as_conditioning, seed, n_ctx, use_cache=True, 
+            unique_id=None, extra_pnginfo=None, image3=None, image4=None):
 
-        cache_key = self._generate_cache_key(model_name, mmproj_path, prompt, image1, image2, image3, image4, seed, n_ctx, temperature, max_tokens)
+        cache_key = self._generate_cache_key(model_name, mmproj_path, prompt, image1, image2, 
+                                           image3 or image1, image4 or image1, seed, n_ctx, 
+                                           temperature, max_tokens)
 
         if use_cache and cache_key in self._cache:
             print(f"[rafacostComfy: DreamOmni2-VLM] Using cached result for seed {seed}")
@@ -85,8 +91,13 @@ class DreamOmni2VLM:
             model_path = folder_paths.get_full_path("unet", model_name)
             mmproj_path = folder_paths.get_full_path("unet", mmproj_path)
 
+            # Create list of available images, using None as placeholder for optional ones
+            images = [image1, image2, image3, image4]
+            # Filter out None values
+            images = [img for img in images if img is not None]
+
             tmp_paths = []
-            for i, img_t in enumerate([image1, image2, image3, image4], 1):
+            for i, img_t in enumerate(images, 1):
                 tmp = os.path.join(folder_paths.get_temp_directory(), f"vlm_img{i}.png")
                 tensor_to_pil(img_t).save(tmp)
                 tmp_paths.append(tmp)
@@ -121,7 +132,7 @@ class DreamOmni2VLM:
             )
 
             output = result["choices"][0]["message"]["content"].strip()
-            print(f"[rafacostComfy: DreamOmni2-VLM] Result:\n{result.tostring()}")
+            print(f"[rafacostComfy: DreamOmni2-VLM] Result:\n{json.dumps(result, indent=2, ensure_ascii=False)}")
             print(f"[rafacostComfy: DreamOmni2-VLM] Output:\n{output}")
 
             if use_cache:

@@ -1,3 +1,10 @@
+Here’s a clean **CHANGELOG.md** entry you can add at the root of your repo.
+
+---
+
+### **CHANGELOG.md**
+
+````markdown
 # Changelog
 
 ## [0.4.0] - 2025-10-25
@@ -19,3 +26,48 @@
   numpy
   Pillow
   llama-cpp-python>=0.3.2
+````
+
+### Notes
+
+* CLI-based versions are now deprecated (`v0.1.0–0.3.0`).
+* The node remains backward-compatible with existing ComfyUI workflows.
+* Recommended: install the CUDA build of `llama-cpp-python`:
+
+  ```bash
+  pip install -U llama-cpp-python --prefer-binary
+  ```
+
+  or for CUDA 12.4:
+
+  ```bash
+  pip install llama_cpp_python-0.3.2+cu124-cp312-cp312-win_amd64.whl
+  ```
+
+---
+
+## [0.3.0] - 2025-10-20
+
+* Added local cache system for seed-based reproducibility.
+* Added prompt-output node for workflow display.
+* Added support for four input images.
+
+## [0.2.0] - 2025-10-15
+
+* Added ComfyUI-level caching support.
+* Added support for `extra_model_paths.yaml`.
+
+## [0.1.0] - 2025-10-10
+
+* Initial release with CLI-based DreamOmni2 GGUF inference.
+
+````
+
+---
+
+You can now include it in your commit:
+```bash
+git add CHANGELOG.md
+git commit -m "add CHANGELOG.md for v0.4.0 release"
+git push origin main
+````

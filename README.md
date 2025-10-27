@@ -1,54 +1,52 @@
 # ComfyUI-DreamOmni2-GGUF
 
-A **ComfyUI custom node** to run **DreamOmni2 GGUF** models directly inside ComfyUI — now with **multimodal (image + text)** support through the **llama-mtmd-cli** tool.
+A **ComfyUI custom node** for **DreamOmni2 GGUF multimodal models** — powered directly by **`llama-cpp-python`**, no external executables required.
 
-⚠️ **Work In Progress – use at your own risk.** ⚠️ <br/>
-<sub>(Or better: fork and help improve it.)</sub>
+⚠️ **Work in Progress** — use at your own risk. <sub>(Or better: fork and help improve it.)</sub>
 
 ---
 
 ## ✨ Features
 
-* Load and run **DreamOmni2 GGUF** models directly in ComfyUI.
-* Supports **image + text multimodal pipelines** via `llama-mtmd-cli`.
-* Accepts up to **two image inputs** from ComfyUI’s `Load Image` node.
-* Returns **text output** or **conditioning embeddings**.
-* Works with **quantized GGUF** models for high performance.
+* Run **DreamOmni2 GGUF** models natively inside ComfyUI.
+* Full **image + text multimodal support** through the `llama-cpp-python` backend.
+* Accepts up to **four image inputs** simultaneously.
+* Outputs either:
+
+  * **conditioning embeddings** (for generation workflows), or
+  * **text descriptions** (for captioning or analysis).
+* Built-in **seeded cache system** for deterministic results across sessions.
+* No dependency on external binaries or CLI tools.
 
 ---
 
 ## 🧩 Prerequisites
 
-You need the **`llama-mtmd-cli`** executable — it handles the image encoder and multimodal context for Qwen2VL and DreamOmni2-style models.
+Requires **Python ≥ 3.12** and a working **ComfyUI ≥ 0.3.66**.
 
-### Option 1 – Download Precompiled Binary
-
-Download the latest prebuilt version from the official [llama.cpp releases](https://github.com/ggerganov/llama.cpp/releases).
-Look for:
-
-```
-llama-mtmd-cli.exe
-```
-
-Place it anywhere and copy its full path. You’ll provide this path in the node.
-
-### Option 2 – Build It Yourself
+Install dependencies (CPU or CUDA builds supported):
 
 ```bash
-git clone https://github.com/ggerganov/llama.cpp
-cd llama.cpp
-mkdir build && cd build
-cmake ..
-cmake --build . --config Release
+pip install -r requirements.txt
 ```
 
-The compiled binary will appear at:
+**requirements.txt**
 
 ```
-build/bin/Release/llama-mtmd-cli.exe
+torch>=2.2.0
+numpy
+Pillow
+llama-cpp-python>=0.3.16
 ```
 
-You can copy it into your ComfyUI `custom_nodes/rafacost-comfy/` folder or another location of your choice.
+For CUDA acceleration, install the matching wheel from
+[llama-cpp-python (CUDA builds)](https://github.com/abetlen/llama-cpp-python/releases).
+
+Example (Windows CUDA 12.x):
+
+```bash
+pip install llama_cpp_python-0.3.16+cu124-cp312-cp312-win_amd64.whl
+```
 
 ---
 
@@ -60,9 +58,10 @@ You can copy it into your ComfyUI `custom_nodes/rafacost-comfy/` folder or anoth
    git clone https://github.com/rafacost/rafacost-comfy.git
    ```
 
-2. Download the **DreamOmni2** model, mmproj and LORA files from [Hugging Face](https://huggingface.co/rafacost/DreamOmni2-7.6B-GGUF).
+2. Download the **DreamOmni2 GGUF** and **mmproj** models from
+   [Hugging Face](https://huggingface.co/rafacost/DreamOmni2-7.6B-GGUF).
 
-3. Place them here:
+3. Place them in:
 
    ```
    ComfyUI/models/unet/
@@ -76,43 +75,44 @@ You can copy it into your ComfyUI `custom_nodes/rafacost-comfy/` folder or anoth
 
 ---
 
-## 🧰 Usage
+## ⚙️ Usage
 
-1. Launch ComfyUI.
-2. Add the **DreamOmni2VLM** node from the **rafacostComfy/VLM** category.
+1. Launch **ComfyUI**.
+
+2. Add the **DreamOmni2-VLM** node under **rafacostComfy / VLM**.
+
 3. Configure the node:
 
-   * **CLI Path:** Path to your `llama-mtmd-cli.exe`.
-   * **Model:** Select your `.gguf` model from the dropdown.
-   * **MMProj Path:** Path to `mmproj.gguf` (vision adapter).
-   * **Images:** Connect up to two image inputs.
-   * **Prompt:** Type your text prompt (e.g., “Apply the style of image 1 on image 2”).
-4. Run the workflow.
+   * **Model** – select your `DreamOmni2` `.gguf` model.
+   * **MMProj Path** – select your vision projection `.gguf`.
+   * **Images** – connect up to four `Load Image` nodes.
+   * **Prompt** – enter a description or instruction.
+   * **Seed** – for deterministic results (cache linked).
+   * **Use Cache** – toggle to reuse previous generations.
+   * **As Conditioning** – output embeddings instead of raw text.
 
-The node will execute the CLI, process the images, and return text results to both:
-
-* The **ComfyUI output**, and
-* Your **terminal console** (for debug/logs).
+4. Optionally connect a **DreamOmni2 Output Node** to visualize the generated text inside the workflow.
 
 ---
 
 ## 🧪 Example
 
-Try workflow folder, or the image_result.png in examples.
+Use the sample workflow provided in `workflows/` or connect images manually.
+Outputs appear both in the **ComfyUI graph** and in the **terminal console**.
 
 ---
 
 ## ⚙️ Troubleshooting
 
-| Problem                                  | Possible Cause                                                               | Fix                                                                      |
-| ---------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `CLI failed: not found`                  | Wrong path to `llama-mtmd-cli.exe`.                                          | Verify path and escape backslashes (`C:\\path\\to\\llama-mtmd-cli.exe`). |
-| Model loads but crashes                  | Out-of-memory or incompatible quantization.                                  | Try a smaller GGUF quant (e.g. `Q4_K` instead of `Q8_0`).                |
-| `'NoneType' object is not iterable`      | Missing mmproj file.                                                         | Download or copy `mmproj.gguf` into the same folder as the model.        |
-| No output text                           | The model didn’t produce text tokens.                                        | Increase `max_tokens` (e.g. 512 or 1024).                                |
-| Garbled CLI text                         | Locale issue.                                                                | Run ComfyUI with UTF-8 environment: `set PYTHONUTF8=1`.                  |
-| Low Image Quality                        | Low Base Model GGUF quant                                                    | Try a higher GGUF quant for BaseModel (eg. use flux_kontext:`Q8_0`)      |
-| Low Prompt Adherence                     | Low DreamOmni2 GGUF quant                                                    | Try a higher GGUF quant for DreamOmni2 (eg. use DreamOmni2-GGUF:`Q8_0`)  |
+| Issue                                            | Cause                                  | Fix                                              |
+| ------------------------------------------------ | -------------------------------------- | ------------------------------------------------ |
+| `ImportError: cannot import Qwen25VLChatHandler` | Missing or outdated `llama-cpp-python` | `pip install --upgrade llama-cpp-python>=0.3.16` |
+| Model loads but crashes                          | Out-of-memory                          | Try lower quant (e.g. `Q4_K`)                    |
+| No output text                                   | Prompt too short / token limit         | Increase `max_tokens`                            |
+| Different outputs for same seed                  | Cache disabled or model reset          | Enable **Use Cache**                             |
+| “NoneType object” errors                         | Missing mmproj                         | Verify both GGUF files are present               |
+| Low Image Quality                                | Low Base Model GGUF quant              | Try a higher GGUF quant for BaseModel (eg. use flux_kontext:`Q8_0`)      |
+| Low Prompt Adherence                             | Low DreamOmni2 GGUF quant              | Try a higher GGUF quant for DreamOmni2 (eg. use DreamOmni2-GGUF:`Q8_0`)  |
 
 ---
 

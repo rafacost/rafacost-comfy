@@ -36,6 +36,7 @@ pip install -r requirements.txt
 torch>=2.2.0
 numpy
 Pillow
+scikit-build-core
 llama-cpp-python>=0.3.16
 ```
 

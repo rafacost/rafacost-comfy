@@ -1,10 +1,3 @@
-Here’s a clean **CHANGELOG.md** entry you can add at the root of your repo.
-
----
-
-### **CHANGELOG.md**
-
-````markdown
 # Changelog
 
 ## [0.4.0] - 2025-10-25
@@ -26,7 +19,7 @@ Here’s a clean **CHANGELOG.md** entry you can add at the root of your repo.
   numpy
   Pillow
   llama-cpp-python>=0.3.2
-````
+  ```
 
 ### Notes
 
@@ -60,14 +53,3 @@ Here’s a clean **CHANGELOG.md** entry you can add at the root of your repo.
 ## [0.1.0] - 2025-10-10
 
 * Initial release with CLI-based DreamOmni2 GGUF inference.
-
-````
-
----
-
-You can now include it in your commit:
-```bash
-git add CHANGELOG.md
-git commit -m "add CHANGELOG.md for v0.4.0 release"
-git push origin main
-````

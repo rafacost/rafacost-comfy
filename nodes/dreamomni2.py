@@ -52,7 +52,7 @@ class DreamOmni2VLM:
                 "seed": ("INT", {"default": 42}),
                 "temperature": ("FLOAT", {"default": 0.5}),
                 "max_tokens": ("INT", {"default": 2048, "min": 512, "max": 4096, "step": 256}),
-                "n_ctx": ("INT", {"default": 2048, "min": 512, "max": 128000, "step": 256}),
+                "n_ctx": ("INT", {"default": 2048, "min": 0, "max": 128000, "step": 256}),
                 "as_conditioning": ("BOOLEAN", {"default": True}),
                 "use_cache": ("BOOLEAN", {"default": True}),
             },
@@ -80,9 +80,21 @@ class DreamOmni2VLM:
             temperature, max_tokens, as_conditioning, seed, n_ctx, use_cache=True, 
             unique_id=None, extra_pnginfo=None, image3=None, image4=None):
 
-        cache_key = self._generate_cache_key(model_name, mmproj_path, prompt, image1, image2, 
-                                           image3 or image1, image4 or image1, seed, n_ctx, 
-                                           temperature, max_tokens)
+        # Avoid using Python's `or` with tensors (raises: "Boolean value of Tensor with more than one value is ambiguous").
+        # Use explicit None checks so we don't attempt to evaluate tensor truthiness.
+        cache_key = self._generate_cache_key(
+            model_name,
+            mmproj_path,
+            prompt,
+            image1,
+            image2,
+            image3 if image3 is not None else image1,
+            image4 if image4 is not None else image1,
+            seed,
+            temperature,
+            max_tokens,
+            n_ctx,
+        )
 
         if use_cache and cache_key in self._cache:
             print(f"[rafacostComfy: DreamOmni2-VLM] Using cached result for seed {seed}")
@@ -131,8 +143,9 @@ class DreamOmni2VLM:
                 max_tokens=max_tokens,
             )
 
+            #print(f"[rafacostComfy: DreamOmni2-VLM] Message:\n{messages}")
             output = result["choices"][0]["message"]["content"].strip()
-            print(f"[rafacostComfy: DreamOmni2-VLM] Result:\n{json.dumps(result, indent=2, ensure_ascii=False)}")
+            #print(f"[rafacostComfy: DreamOmni2-VLM] Result:\n{json.dumps(result, indent=2, ensure_ascii=False)}")
             print(f"[rafacostComfy: DreamOmni2-VLM] Output:\n{output}")
 
             if use_cache:

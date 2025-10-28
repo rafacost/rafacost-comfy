@@ -50,9 +50,9 @@ class DreamOmni2VLM:
                 "image1": ("IMAGE",),
                 "image2": ("IMAGE",),
                 "seed": ("INT", {"default": 42}),
-                "temperature": ("FLOAT", {"default": 0.5}),
+                "temperature": ("FLOAT", {"default": 0.7}),
                 "max_tokens": ("INT", {"default": 2048, "min": 512, "max": 4096, "step": 256}),
-                "n_ctx": ("INT", {"default": 2048, "min": 0, "max": 128000, "step": 256}),
+                "n_ctx": ("INT", {"default": 0, "min": 0, "max": 128000, "step": 512}),
                 "flash_attn": ("BOOLEAN", {"default": True}),
                 "use_gpu": ("BOOLEAN", {"default": True}),
                 "as_conditioning": ("BOOLEAN", {"default": True}),
@@ -82,8 +82,6 @@ class DreamOmni2VLM:
             temperature, max_tokens, as_conditioning, seed, n_ctx, flash_attn, use_gpu, use_cache=True,
             unique_id=None, extra_pnginfo=None, image3=None, image4=None):
 
-        # Avoid using Python's `or` with tensors (raises: "Boolean value of Tensor with more than one value is ambiguous").
-        # Use explicit None checks so we don't attempt to evaluate tensor truthiness.
         cache_key = self._generate_cache_key(
             model_name,
             mmproj_path,

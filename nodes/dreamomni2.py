@@ -53,6 +53,8 @@ class DreamOmni2VLM:
                 "temperature": ("FLOAT", {"default": 0.5}),
                 "max_tokens": ("INT", {"default": 2048, "min": 512, "max": 4096, "step": 256}),
                 "n_ctx": ("INT", {"default": 2048, "min": 0, "max": 128000, "step": 256}),
+                "flash_attn": ("BOOLEAN", {"default": True}),
+                "use_gpu": ("BOOLEAN", {"default": True}),
                 "as_conditioning": ("BOOLEAN", {"default": True}),
                 "use_cache": ("BOOLEAN", {"default": True}),
             },
@@ -71,13 +73,13 @@ class DreamOmni2VLM:
     FUNCTION = "run"
     CATEGORY = "rafacostComfy/VLM"
 
-    def _generate_cache_key(self, model_name, mmproj_path, prompt, image1, image2, image3, image4, seed, temperature, max_tokens, n_ctx):
+    def _generate_cache_key(self, model_name, mmproj_path, prompt, image1, image2, image3, image4, seed, temperature, max_tokens, n_ctx, flash_attn, use_gpu):
         img_hash = lambda t: hashlib.md5(t.cpu().numpy().tobytes()).hexdigest()
-        key = f"{model_name}_{mmproj_path}_{prompt}_{img_hash(image1)}_{img_hash(image2)}_{img_hash(image3)}_{img_hash(image4)}_{seed}_{temperature}_{max_tokens}"
+        key = f"{model_name}_{mmproj_path}_{prompt}_{img_hash(image1)}_{img_hash(image2)}_{img_hash(image3)}_{img_hash(image4)}_{seed}_{temperature}_{max_tokens}_{n_ctx}_{flash_attn}_{use_gpu}"
         return hashlib.md5(key.encode()).hexdigest()
 
     def run(self, model_name, mmproj_path, prompt, image1, image2, clip,
-            temperature, max_tokens, as_conditioning, seed, n_ctx, use_cache=True, 
+            temperature, max_tokens, as_conditioning, seed, n_ctx, flash_attn, use_gpu, use_cache=True,
             unique_id=None, extra_pnginfo=None, image3=None, image4=None):
 
         # Avoid using Python's `or` with tensors (raises: "Boolean value of Tensor with more than one value is ambiguous").
@@ -94,6 +96,8 @@ class DreamOmni2VLM:
             temperature,
             max_tokens,
             n_ctx,
+            flash_attn,
+            use_gpu
         )
 
         if use_cache and cache_key in self._cache:
@@ -123,8 +127,9 @@ class DreamOmni2VLM:
                 model_path=model_path,
                 chat_handler=chat_handler,
                 n_ctx=n_ctx,
-                n_gpu_layers=-1,
-                verbose=False,
+                flash_attn=flash_attn,
+                n_gpu_layers=(-1 if use_gpu else 0),
+                verbose=True,
                 seed=seed,
             )
 

@@ -114,6 +114,7 @@ Outputs appear both in the **ComfyUI graph** and in the **terminal console**.
 | “NoneType object” errors                         | Missing mmproj                         | Verify both GGUF files are present               |
 | Low Image Quality                                | Low Base Model GGUF quant              | Try a higher GGUF quant for BaseModel (eg. use flux_kontext:`Q8_0`)      |
 | Low Prompt Adherence                             | Low DreamOmni2 GGUF quant              | Try a higher GGUF quant for DreamOmni2 (eg. use DreamOmni2-GGUF:`Q8_0`)  |
+|Slow generation                                   | CPU fallback.                          | Compile llama-cpp-python with CUDA for GPU acceleration.|
 
 ---
 
